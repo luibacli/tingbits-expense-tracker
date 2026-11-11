@@ -1,0 +1,21 @@
+{
+  "name": "Tingbits Expense Tracker",
+  "short_name": "Tingbits",
+  "description": "Know what your family can spend today, and still make it to payday.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f3ee",
+  "theme_color": "#f4f3ee",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Add expense", "url": "/app?add=expense" },
+    { "name": "Add income", "url": "/app?add=income" }
+  ]
+}

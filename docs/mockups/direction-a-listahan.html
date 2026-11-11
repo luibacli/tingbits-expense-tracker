@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock-up A · Listahan · Bacli Expenses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<style>
+  :root { --paper:#f4f3ee; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#6b6a66; --line:#e1e0d9; --margin:#c2412d; --data:#2a78d6; --track:#cde2fb; }
+  body { background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .serif { font-family: Fraunces, Georgia, serif; font-optical-sizing: auto; }
+  .ruled { background-image: repeating-linear-gradient(to bottom, transparent 0 31px, rgba(42,120,214,.13) 31px 32px); }
+  .margin-rule { box-shadow: inset 2px 0 0 0 var(--margin); }
+  .num { font-variant-numeric: tabular-nums; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:0 1.25rem; border-radius:10px; font-weight:600; }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-ghost { border:1px solid #c3c2b7; }
+  .field { width:100%; background:#fff; border:1px solid #c3c2b7; border-radius:10px; padding:.6rem .75rem; font-size:1rem; }
+  :focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+  .underline-margin { text-decoration: underline; text-decoration-color: var(--margin); text-decoration-thickness: 3px; text-underline-offset: 6px; }
+  @media (prefers-reduced-motion: no-preference) { .bar { transition: height .5s cubic-bezier(.2,.7,.2,1); } }
+  .mock-flag { background:#fff7d6; border-bottom:1px solid #e9d98a; }
+</style>
+</head>
+<body>
+<div class="mock-flag px-4 py-2 text-center text-sm">Mock-up · Direction A "Listahan" · for approval, not the final build</div>
+
+<header class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+  <a href="#" class="flex items-center gap-2 text-lg font-semibold">
+    <svg width="26" height="26" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="96" fill="#0b0b0b"/><g fill="#3987e5"><rect x="112" y="248" width="40" height="144" rx="8"/><rect x="176" y="196" width="40" height="196" rx="8"/><rect x="240" y="292" width="40" height="100" rx="8"/><rect x="304" y="168" width="40" height="224" rx="8"/></g><rect x="368" y="300" width="40" height="92" rx="8" fill="#f0efec"/><path d="M96 236H416" stroke="#f0efec" stroke-width="12" stroke-dasharray="22 14"/></svg>
+    Bacli Expenses
+  </a>
+  <nav aria-label="Main" class="hidden items-center gap-6 text-sm text-[color:var(--ink2)] md:flex">
+    <a href="#how">How it works</a><a href="#family">For families</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+  </nav>
+  <div class="flex items-center gap-2">
+    <a href="#" class="hidden px-3 text-sm font-medium sm:inline">Sign in</a>
+    <a href="#pricing" class="btn btn-primary !min-h-[42px] text-sm">Try free</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO with the signature calculator -->
+  <section class="ruled">
+    <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pb-24 lg:pt-16">
+      <div>
+        <h1 class="serif text-[2.6rem] leading-[1.05] sm:text-6xl">Know what your family can spend <span class="underline-margin">today</span>, and still make it to payday.</h1>
+        <p class="mt-5 max-w-xl text-lg leading-8 text-[color:var(--ink2)]">Bacli turns your budget into one number every morning. Everyone in the house logs spending in seconds, even without signal, and the bills never sneak up on you.</p>
+        <div class="mt-7 flex flex-wrap items-center gap-3">
+          <a href="#pricing" class="btn btn-primary">Start your 30-day free trial</a>
+          <a href="#how" class="btn btn-ghost">See how it works</a>
+        </div>
+        <p class="mt-3 text-sm text-[color:var(--muted)]">₱150 a month for the whole family. No card needed to try.</p>
+      </div>
+
+      <div class="margin-rule rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5 pl-7 shadow-[0_8px_24px_rgba(11,11,11,.06)]" aria-labelledby="calc-title">
+        <h2 id="calc-title" class="text-sm font-semibold text-[color:var(--ink2)]">Try it with your numbers</h2>
+        <form class="mt-3 grid grid-cols-2 gap-3" oninput="calc()" onsubmit="return false">
+          <label class="col-span-2 text-sm font-medium">Budget until payday (₱)
+            <input id="budget" class="field num mt-1" inputmode="decimal" value="30000"></label>
+          <label class="text-sm font-medium">Spent so far (₱)
+            <input id="spent" class="field num mt-1" inputmode="decimal" value="18400"></label>
+          <label class="text-sm font-medium">Next payday
+            <select id="payday" class="field mt-1"><option value="15">15th (kinsenas)</option><option value="30" selected>30th (katapusan)</option></select></label>
+        </form>
+        <div class="mt-5 border-t border-dashed border-[color:var(--line)] pt-4" aria-live="polite">
+          <p class="text-sm text-[color:var(--ink2)]">Safe to spend today</p>
+          <p id="safe" class="serif num text-5xl text-[color:var(--ink)]">₱1,288</p>
+          <p id="note" class="mt-1 text-sm text-[color:var(--ink2)]">₱11,600 left, 9 days to payday.</p>
+          <div id="bars" class="mt-4 flex h-20 items-end gap-1" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOUND FAMILIAR -->
+  <section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <h2 class="serif text-3xl sm:text-4xl">"Saan napunta ang sweldo?"</h2>
+    <ul class="mt-6 space-y-4 text-lg leading-8 text-[color:var(--ink2)]">
+      <li class="border-l-2 border-[color:var(--margin)] pl-4">The kinsenas is gone by the 10th, and nobody can say where.</li>
+      <li class="border-l-2 border-[color:var(--margin)] pl-4">The Meralco bill lands the same week as tuition.</li>
+      <li class="border-l-2 border-[color:var(--margin)] pl-4">Cash in one wallet, GCash in another phone, a card in a third. The listahan only has half of it.</li>
+    </ul>
+    <p class="mt-6 text-lg leading-8">Budgets don't fail because families don't care. They fail because no one can see, today, what's still okay to spend.</p>
+  </section>
+
+  <!-- HOW IT WORKS (real order, so numbered) -->
+  <section id="how" class="border-y border-[color:var(--line)] bg-[color:var(--surface)]">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+      <h2 class="serif text-3xl sm:text-4xl">How it works</h2>
+      <ol class="mt-8 grid gap-8 md:grid-cols-3">
+        <li><p class="serif text-4xl text-[color:var(--data)]">1</p><h3 class="mt-2 text-lg font-semibold">Set your budget and payday</h3><p class="mt-1 text-[color:var(--ink2)]">Monthly, or from the 15th to the 30th. Add the bills that repeat: rent, Meralco, internet, tuition.</p></li>
+        <li><p class="serif text-4xl text-[color:var(--data)]">2</p><h3 class="mt-2 text-lg font-semibold">Everyone logs in seconds</h3><p class="mt-1 text-[color:var(--ink2)]">Tap +, type ₱120, pick Food. Things you buy often become one tap. It works offline too.</p></li>
+        <li><p class="serif text-4xl text-[color:var(--data)]">3</p><h3 class="mt-2 text-lg font-semibold">Check one number each morning</h3><p class="mt-1 text-[color:var(--ink2)]">Bacli spreads what's left over the days to payday. Spend more today and tomorrow adjusts.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAMILY -->
+  <section id="family" class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2">
+    <div>
+      <h2 class="serif text-3xl sm:text-4xl">One ledger for the whole house</h2>
+      <p class="mt-4 text-lg leading-8 text-[color:var(--ink2)]">Invite your partner, your kuya who does the grocery run, or anyone who spends from the family budget. Everyone sees the same numbers, and every entry shows who added it.</p>
+      <ul class="mt-6 space-y-2 text-[color:var(--ink2)]">
+        <li>· Join with a simple invite code</li>
+        <li>· See who paid for what, and how: cash, card or e-wallet</li>
+        <li>· One price covers everyone. No per-person fees.</li>
+      </ul>
+    </div>
+    <figure class="margin-rule rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5 pl-7">
+      <figcaption class="text-sm font-semibold text-[color:var(--ink2)]">Today · from the app</figcaption>
+      <ul class="mt-3 divide-y divide-[color:var(--line)]">
+        <li class="flex items-center justify-between py-3"><span>🛒 Puregold <span class="text-sm text-[color:var(--muted)]">· added by Ana</span></span><span class="num font-semibold">₱2,340.00</span></li>
+        <li class="flex items-center justify-between py-3"><span>🚌 Jeepney <span class="text-sm text-[color:var(--muted)]">· added by Luigi</span></span><span class="num font-semibold">₱26.00</span></li>
+        <li class="flex items-center justify-between py-3"><span>💡 Meralco <span class="text-sm text-[color:var(--muted)]">· bill, marked paid</span></span><span class="num font-semibold">₱3,120.00</span></li>
+      </ul>
+      <p class="mt-2 text-xs text-[color:var(--muted)]">Example data</p>
+    </figure>
+  </section>
+
+  <!-- REAL LIFE -->
+  <section class="border-y border-[color:var(--line)] bg-[color:var(--surface)]">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+      <h2 class="serif text-3xl sm:text-4xl">Built for how Filipino families really spend</h2>
+      <dl class="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2">
+        <div><dt class="font-semibold">Works without signal</dt><dd class="mt-1 text-[color:var(--ink2)]">Log at the palengke or on the jeep. It syncs when you're back online.</dd></div>
+        <div><dt class="font-semibold">Payday cycles, not just calendar months</dt><dd class="mt-1 text-[color:var(--ink2)]">Start your budget month on the 15th or the 30th, whenever the sweldo arrives.</dd></div>
+        <div><dt class="font-semibold">Bills that remember themselves</dt><dd class="mt-1 text-[color:var(--ink2)]">Rent and subscriptions log automatically. Meralco and water remind you with "Mark paid".</dd></div>
+        <div><dt class="font-semibold">No bank linking needed</dt><dd class="mt-1 text-[color:var(--ink2)]">Cash, GCash, Maya, cards: just log what you spend. Your passwords stay yours.</dd></div>
+        <div><dt class="font-semibold">See where it went</dt><dd class="mt-1 text-[color:var(--ink2)]">Categories, budgets, the last six months, and who paid. Export to Excel anytime.</dd></div>
+        <div><dt class="font-semibold">Your data is yours</dt><dd class="mt-1 text-[color:var(--ink2)]">Private to your household. Download everything or delete your account whenever you want.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <div class="mx-auto max-w-lg text-center">
+      <h2 class="serif text-3xl sm:text-4xl">One simple price</h2>
+      <p class="mt-3 text-lg text-[color:var(--ink2)]">For the whole family. About ₱5 a day.</p>
+    </div>
+    <div class="margin-rule mx-auto mt-8 max-w-md rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-6 pl-8 shadow-[0_8px_24px_rgba(11,11,11,.06)]">
+      <p class="font-semibold">Bacli Family</p>
+      <p class="mt-2"><span class="serif num text-5xl">₱150</span> <span class="text-[color:var(--ink2)]">/ month</span></p>
+      <ul class="mt-5 space-y-2 text-[color:var(--ink2)]">
+        <li>✓ Unlimited family members</li><li>✓ Safe-to-spend-today, budgets and insights</li><li>✓ Recurring bills and reminders</li><li>✓ Works offline on any phone</li><li>✓ Export anytime, cancel anytime</li>
+      </ul>
+      <a href="#" class="btn btn-primary mt-6 w-full">Start your 30-day free trial</a>
+      <p class="mt-2 text-center text-sm text-[color:var(--muted)]">No card needed to try. Pay by card or Maya after.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+    <h2 class="serif text-3xl sm:text-4xl">Questions</h2>
+    <div class="mt-6 divide-y divide-[color:var(--line)] border-y border-[color:var(--line)]">
+      <details class="py-4"><summary class="cursor-pointer font-semibold">Do I have to connect my bank or GCash?</summary><p class="mt-2 text-[color:var(--ink2)]">No. You log what you spend in a few taps. Nothing connects to your accounts.</p></details>
+      <details class="py-4"><summary class="cursor-pointer font-semibold">Who in the family can use it?</summary><p class="mt-2 text-[color:var(--ink2)]">Everyone you invite. One ₱150 subscription covers the whole household.</p></details>
+      <details class="py-4"><summary class="cursor-pointer font-semibold">What happens after the free trial?</summary><p class="mt-2 text-[color:var(--ink2)]">Subscribe to keep adding entries. If you don't, your data stays safe and readable, and you can still export it.</p></details>
+      <details class="py-4"><summary class="cursor-pointer font-semibold">Does it work on iPhone and Android?</summary><p class="mt-2 text-[color:var(--ink2)]">Yes. It runs in your phone's browser and can be added to your home screen like an app.</p></details>
+      <details class="py-4"><summary class="cursor-pointer font-semibold">Can I cancel anytime?</summary><p class="mt-2 text-[color:var(--ink2)]">Yes, from Settings. No contracts.</p></details>
+    </div>
+  </section>
+
+  <section class="ruled border-t border-[color:var(--line)]">
+    <div class="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
+      <h2 class="serif text-3xl sm:text-5xl">Make it to payday, every payday.</h2>
+      <a href="#pricing" class="btn btn-primary mt-6">Start your 30-day free trial</a>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-[color:var(--line)]">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-[color:var(--muted)] sm:px-6">
+    <p>© 2026 Bacli Expenses</p>
+    <p class="flex gap-4"><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Contact</a></p>
+  </div>
+</footer>
+
+<script>
+  const peso = (n) => '₱' + Math.max(0, Math.round(n)).toLocaleString('en-PH')
+  function daysToPayday(day) {
+    const t = new Date(); t.setHours(12, 0, 0, 0)
+    let p = new Date(t.getFullYear(), t.getMonth(), Math.min(day, new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate()), 12)
+    if (p <= t) p = new Date(t.getFullYear(), t.getMonth() + 1, Math.min(day, new Date(t.getFullYear(), t.getMonth() + 2, 0).getDate()), 12)
+    return Math.max(1, Math.round((p - t) / 86400000))
+  }
+  function calc() {
+    const num = (id) => Number(String(document.getElementById(id).value).replace(/[^\d.]/g, '')) || 0
+    const left = num('budget') - num('spent')
+    const days = daysToPayday(Number(document.getElementById('payday').value))
+    const per = left / days
+    document.getElementById('safe').textContent = left > 0 ? peso(per) : '₱0'
+    document.getElementById('note').textContent = left > 0 ? `${peso(left)} left, ${days} ${days === 1 ? 'day' : 'days'} to payday.` : 'Already over budget for this payday.'
+    const bars = document.getElementById('bars')
+    bars.innerHTML = ''
+    for (let i = 0; i < Math.min(days, 16); i++) {
+      const b = document.createElement('span')
+      b.className = 'bar block flex-1 rounded-t-[4px]'
+      b.style.background = i === 0 ? 'var(--data)' : 'var(--track)'
+      b.style.height = '0%'
+      bars.appendChild(b)
+      requestAnimationFrame(() => { b.style.height = left > 0 ? '70%' : '4%' })
+    }
+  }
+  calc()
+</script>
+</body>
+</html>

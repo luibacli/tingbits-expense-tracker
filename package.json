@@ -1,0 +1,44 @@
+{
+  "name": "tingbits-expense-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "test:e2e": "nuxt build && playwright test",
+    "test:unit": "vitest run",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "dependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@lucide/vue": "^1.70.0",
+    "@pinia/nuxt": "^1.0.3",
+    "mongoose": "^9.12.0",
+    "nuxt": "^4.6.0",
+    "pinia": "^4.1.0",
+    "vue": "^3.5.0",
+    "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/node": "^24.19.2",
+    "mongodb-memory-server": "^11.3.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.1.0",
+    "vue-tsc": "^3.3.0"
+  },
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "disablePostinstall": "1"
+    }
+  }
+}

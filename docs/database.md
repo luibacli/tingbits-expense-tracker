@@ -26,6 +26,7 @@ MongoDB through Mongoose. Models are in `server/models/index.ts`, with hand-writ
 | Due automatic recurring items | `household` |
 
 ## Lifecycle
+- Removing an account or a member deleting their own account deletes only the `users` document; their entries and their "person" stay. A sole owner deleting their account deletes the household, its `transactions` and `recurring`, and the user (A9).
 - Entries live until deleted. "Erase all entries" (owner) deletes the household's transactions and recurring items. The household, people and accounts stay.
 - No soft delete, no audit log (Proposed: acceptable for a household app).
 - Backups: the user exports JSON from Settings. Database-level backups depend on the MongoDB host (Atlas snapshots), which is not configured by this project.

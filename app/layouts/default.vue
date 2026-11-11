@@ -1,10 +1,24 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watchEffect } from 'vue'
+import { onBeforeUnmount, onMounted, watch, watchEffect } from 'vue'
 import { House, List, ChartColumn, CalendarClock, Settings, Plus, Wallet, CloudOff, RefreshCw } from '@lucide/vue'
 
 const store = useLedgerStore()
+
 const sheet = useEntrySheet()
 const route = useRoute()
+
+// The one place that leaves the app when the session ends: signing out, deleting the account, or
+// the server ending it (account removed by the owner, cookie expired). The store has already
+// cleared this device.
+watch(() => store.status, (s) => {
+  if (s !== 'signed-out') return
+  const reason = store.endReason
+  const query = reason === 'deleted-account' ? { deleted: 'account' }
+    : reason === 'deleted-household' ? { deleted: 'household' }
+      : reason === 'expired' && route.path !== '/app' ? { next: route.fullPath }
+        : undefined
+  void navigateTo({ path: '/login', query })
+}, { immediate: true }) // the session may already have ended before this layout mounted
 
 const nav = [
   { to: '/app', label: 'Today', icon: House },

@@ -274,3 +274,37 @@ export function validateLogin(raw: unknown): Valid<{ email: string, password: st
   if (!email || !password || password.length > 200) return { ok: false, fields: { email: 'Enter your email and password.' } }
   return { ok: true, value: { email, password } }
 }
+
+/* ---------- account management ---------- */
+
+const passwordOf = (raw: Obj, key: string) => (typeof raw[key] === 'string' ? raw[key] as string : '')
+
+export function validateTransfer(raw: unknown): Valid<{ accountId: string, password: string }> {
+  if (!isObj(raw)) return { ok: false, fields: { body: 'Expected an object.' } }
+  const f: Record<string, string> = {}
+  const accountId = typeof raw.accountId === 'string' && /^[a-f0-9]{24}$/.test(raw.accountId) ? raw.accountId : ''
+  if (!accountId) f.accountId = 'Choose who should become the owner.'
+  const password = passwordOf(raw, 'password')
+  if (!password || password.length > 200) f.password = 'Enter your password.'
+  return Object.keys(f).length ? { ok: false, fields: f } : { ok: true, value: { accountId, password } }
+}
+
+export function validateDeleteAccount(raw: unknown): Valid<{ password: string }> {
+  if (!isObj(raw)) return { ok: false, fields: { body: 'Expected an object.' } }
+  const f: Record<string, string> = {}
+  const password = passwordOf(raw, 'password')
+  if (!password || password.length > 200) f.password = 'Enter your password.'
+  if (raw.confirm !== 'DELETE') f.confirm = 'Type DELETE to confirm.'
+  return Object.keys(f).length ? { ok: false, fields: f } : { ok: true, value: { password } }
+}
+
+export function validatePasswordChange(raw: unknown): Valid<{ current: string, next: string }> {
+  if (!isObj(raw)) return { ok: false, fields: { body: 'Expected an object.' } }
+  const f: Record<string, string> = {}
+  const current = passwordOf(raw, 'current')
+  const next = passwordOf(raw, 'next')
+  if (!current || current.length > 200) f.current = 'Enter your current password.'
+  if (next.length < 8) f.next = 'Use at least 8 characters.'
+  else if (next.length > 200) f.next = 'Password is too long.'
+  return Object.keys(f).length ? { ok: false, fields: f } : { ok: true, value: { current, next } }
+}

@@ -31,6 +31,14 @@ All endpoints are under `/api`, take and return JSON, and need a signed-in sessi
 | POST | `/api/household/invite` | | `{ inviteCode }` **owner only** |
 | DELETE | `/api/household/ledger` | `{ confirm: "ERASE" }` | `{ transactions, recurring }` deleted counts. **Owner only.** |
 
+## Accounts (rules A7 to A10)
+| Method | Path | Body | Returns | Notes |
+|---|---|---|---|---|
+| DELETE | `/api/household/accounts/:id` | | `{ ok }` | **Owner only.** Deletes another member's account; its entries stay. 404 if the id is not a member of this household; 400 for yourself. |
+| POST | `/api/household/owner` | `{ accountId, password }` | `{ ok }` | **Owner only.** Makes `accountId` the owner; the caller becomes a member. 401 `BAD_PASSWORD`, 404 if not in this household. Rate-limited. |
+| POST | `/api/me/password` | `{ current, next }` | `{ ok }` | `next` needs 8+ characters. 401 `BAD_PASSWORD`. Rate-limited. |
+| DELETE | `/api/me` | `{ password, confirm: "DELETE" }` | `{ householdDeleted }` + cookie cleared | A member leaves. A sole owner also deletes the household and all its data. 409 `OWNER_MUST_TRANSFER` when others share the household (the invite code is renewed either way). 401 `BAD_PASSWORD`. Rate-limited. |
+
 ## Entries
 | Method | Path | Body / query | Returns |
 |---|---|---|---|

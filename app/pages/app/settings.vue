@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Download, Upload, FileSpreadsheet, Trash2, Plus, Archive, ArchiveRestore, Smartphone, X, Copy, LogOut, Users, CreditCard } from '@lucide/vue'
+import { Download, Upload, FileSpreadsheet, Trash2, Plus, Archive, ArchiveRestore, Smartphone, X, Copy, LogOut, Users, CreditCard, UserCog, KeyRound } from '@lucide/vue'
 import type { AppData, TxType } from '#shared/types'
 
 useSeoMeta({ title: 'Settings' })
@@ -65,9 +65,82 @@ async function copyInvite() {
   try { await navigator.clipboard.writeText(code); toast.show('Invite code copied') }
   catch { toast.show(`Invite code: ${code}`) }
 }
+// The layout moves to the sign-in screen once the store reports the session ended.
 async function signOut() {
   await store.logout()
-  await navigateTo('/login')
+}
+
+// ---------- account management (owner: remove, make owner; everyone: password, delete) ----------
+const acting = ref<{ id: string, kind: 'remove' | 'owner' } | null>(null)
+const actPassword = ref('')
+const actError = ref('')
+const actBusy = ref(false)
+const actingName = computed(() => store.household?.accounts.find((a) => a.id === acting.value?.id)?.name ?? '')
+function startAct(id: string, kind: 'remove' | 'owner') {
+  acting.value = { id, kind }
+  actPassword.value = ''
+  actError.value = ''
+}
+async function confirmAct() {
+  if (!acting.value) return
+  const { id, kind } = acting.value
+  const name = actingName.value
+  actBusy.value = true
+  actError.value = ''
+  try {
+    if (kind === 'remove') {
+      await store.removeAccount(id)
+      toast.show(`${name} was removed from the household`)
+    } else {
+      await store.transferOwnership(id, actPassword.value)
+      toast.show(`${name} is now the owner`)
+    }
+    acting.value = null
+  } catch (err) {
+    const f = toApiFailure(err)
+    actError.value = f.fields.password ?? f.message
+  } finally {
+    actBusy.value = false
+  }
+}
+
+const pwCurrent = ref('')
+const pwNext = ref('')
+const pwErrors = ref<Record<string, string>>({})
+const pwBusy = ref(false)
+const pwOpen = ref(false)
+async function savePassword() {
+  pwErrors.value = {}
+  if (pwNext.value.length < 8) { pwErrors.value = { next: 'Use at least 8 characters.' }; return }
+  pwBusy.value = true
+  try {
+    await store.changePassword(pwCurrent.value, pwNext.value)
+    pwCurrent.value = ''; pwNext.value = ''; pwOpen.value = false
+    toast.show('Password changed')
+  } catch (err) {
+    const f = toApiFailure(err)
+    pwErrors.value = f.fields.password ? { current: f.fields.password } : Object.keys(f.fields).length ? f.fields : { current: f.message }
+  } finally {
+    pwBusy.value = false
+  }
+}
+
+const otherAccounts = computed(() => (store.household?.accounts ?? []).filter((a) => a.id !== store.user?.id).length)
+const delOpen = ref(false)
+const delPassword = ref('')
+const delError = ref('')
+const delBusy = ref(false)
+async function deleteMe() {
+  delError.value = ''
+  delBusy.value = true
+  try {
+    await store.deleteAccount(delPassword.value)
+  } catch (err) {
+    const f = toApiFailure(err)
+    delError.value = f.fields.password ?? f.message
+  } finally {
+    delBusy.value = false
+  }
 }
 
 // ---------- data ----------
@@ -167,10 +240,33 @@ const formatBackup = (iso: string) => new Date(iso).toLocaleString(undefined, { 
       </div>
       <div>
         <p class="label">Accounts</p>
-        <ul class="text-sm">
-          <li v-for="a in store.household?.accounts ?? []" :key="a.id" class="flex justify-between py-1">
-            <span>{{ a.name }}<span v-if="a.id === store.user?.id" class="text-muted"> (you)</span></span>
-            <span class="text-muted">{{ a.role === 'owner' ? 'Owner' : 'Member' }}</span>
+        <ul class="divide-y divide-line text-sm" data-testid="accounts">
+          <li v-for="a in store.household?.accounts ?? []" :key="a.id" class="py-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span>{{ a.name }}<span v-if="a.id === store.user?.id" class="text-muted"> (you)</span></span>
+              <span class="flex items-center gap-1">
+                <span class="text-muted">{{ a.role === 'owner' ? 'Owner' : 'Member' }}</span>
+                <template v-if="store.isOwner && a.id !== store.user?.id && acting?.id !== a.id">
+                  <button type="button" class="btn btn-ghost !min-h-10 text-sm" :aria-label="`Make ${a.name} the owner`" @click="startAct(a.id, 'owner')">Make owner</button>
+                  <button type="button" class="btn btn-ghost !min-h-10 text-sm" :aria-label="`Remove ${a.name}'s account`" @click="startAct(a.id, 'remove')">Remove</button>
+                </template>
+              </span>
+            </div>
+            <form v-if="acting?.id === a.id" class="mt-2 space-y-2 rounded-xl border border-line-strong p-3" role="group" :aria-label="acting.kind === 'remove' ? `Remove ${a.name}'s account` : `Make ${a.name} the owner`" @submit.prevent="confirmAct">
+              <p v-if="acting.kind === 'remove'">Remove <strong>{{ a.name }}</strong>? They can no longer sign in to this household. Entries they added stay.</p>
+              <template v-else>
+                <p>Make <strong>{{ a.name }}</strong> the owner? You become a member, and only they can manage the plan, invite people and erase entries.</p>
+                <div>
+                  <label :for="`act-pw-${a.id}`" class="label">Your password</label>
+                  <input :id="`act-pw-${a.id}`" v-model="actPassword" type="password" class="field" autocomplete="current-password" required :aria-invalid="!!actError" :aria-describedby="actError ? 'act-error' : undefined">
+                </div>
+              </template>
+              <p v-if="actError" id="act-error" class="text-critical" role="alert">{{ actError }}</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="submit" :class="acting.kind === 'remove' ? 'btn btn-danger' : 'btn btn-primary'" :disabled="actBusy">{{ actBusy ? 'Saving…' : acting.kind === 'remove' ? 'Remove account' : 'Make owner' }}</button>
+                <button type="button" class="btn btn-ghost" :disabled="actBusy" @click="acting = null">Cancel</button>
+              </div>
+            </form>
           </li>
         </ul>
       </div>
@@ -349,12 +445,58 @@ const formatBackup = (iso: string) => new Date(iso).toLocaleString(undefined, { 
       </div>
     </section>
 
-    <section class="card flex flex-wrap items-center justify-between gap-3 p-4" aria-labelledby="account-heading">
-      <div>
-        <h2 id="account-heading" class="font-semibold">Signed in</h2>
-        <p class="text-sm text-ink-2">{{ store.user?.name }} · {{ store.user?.email }}</p>
+    <section class="card space-y-4 p-4" aria-labelledby="account-heading">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 id="account-heading" class="flex items-center gap-2 font-semibold"><UserCog :size="18" aria-hidden="true" /> Your account</h2>
+          <p class="text-sm text-ink-2">{{ store.user?.name }} · {{ store.user?.email }}</p>
+        </div>
+        <button type="button" class="btn btn-ghost" @click="signOut"><LogOut :size="18" aria-hidden="true" /> Sign out</button>
       </div>
-      <button type="button" class="btn btn-ghost" @click="signOut"><LogOut :size="18" aria-hidden="true" /> Sign out</button>
+
+      <div class="border-t border-line pt-4">
+        <button v-if="!pwOpen" type="button" class="btn btn-ghost" @click="pwOpen = true"><KeyRound :size="18" aria-hidden="true" /> Change password</button>
+        <form v-else class="grid gap-3 sm:grid-cols-2" aria-label="Change password" @submit.prevent="savePassword">
+          <div>
+            <label for="pw-current" class="label">Current password</label>
+            <input id="pw-current" v-model="pwCurrent" type="password" class="field" autocomplete="current-password" required :aria-invalid="!!pwErrors.current" :aria-describedby="pwErrors.current ? 'pw-current-error' : undefined">
+            <p v-if="pwErrors.current" id="pw-current-error" class="mt-1 text-sm text-critical">{{ pwErrors.current }}</p>
+          </div>
+          <div>
+            <label for="pw-next" class="label">New password</label>
+            <input id="pw-next" v-model="pwNext" type="password" class="field" autocomplete="new-password" minlength="8" required :aria-invalid="!!pwErrors.next" aria-describedby="pw-next-hint">
+            <p id="pw-next-hint" class="mt-1 text-sm" :class="pwErrors.next ? 'text-critical' : 'text-muted'">{{ pwErrors.next ?? 'At least 8 characters.' }}</p>
+          </div>
+          <div class="flex flex-wrap gap-2 sm:col-span-2">
+            <button type="submit" class="btn btn-primary" :disabled="pwBusy">{{ pwBusy ? 'Saving…' : 'Save password' }}</button>
+            <button type="button" class="btn btn-ghost" :disabled="pwBusy" @click="pwOpen = false; pwErrors = {}">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="border-t border-line pt-4">
+        <button v-if="!delOpen" type="button" class="btn btn-danger" @click="delOpen = true; delError = ''; delPassword = ''"><Trash2 :size="18" aria-hidden="true" /> Delete my account</button>
+        <div v-else class="space-y-3 rounded-xl border border-line-strong p-3" role="group" aria-labelledby="del-heading">
+          <h3 id="del-heading" class="font-semibold">Delete your account</h3>
+          <template v-if="store.isOwner && otherAccounts > 0">
+            <p class="text-sm" data-testid="delete-blocked">You own this household and others use it. Make someone else the owner first (Household, above), or remove the other accounts.</p>
+            <button type="button" class="btn btn-ghost" @click="delOpen = false">Close</button>
+          </template>
+          <form v-else class="space-y-3" @submit.prevent="deleteMe">
+            <p v-if="store.isOwner" class="text-sm" data-testid="delete-warning">This deletes <strong>{{ store.householdName }}</strong> and all its entries and recurring items, for good. <a href="/api/export" download class="underline underline-offset-2" @click="markBackup">Download a backup</a> first if you may want them.</p>
+            <p v-else class="text-sm" data-testid="delete-warning">You will no longer be able to sign in. Entries you added stay with the household.</p>
+            <div>
+              <label for="del-pw" class="label">Your password</label>
+              <input id="del-pw" v-model="delPassword" type="password" class="field" autocomplete="current-password" required :aria-invalid="!!delError" :aria-describedby="delError ? 'del-error' : undefined">
+            </div>
+            <p v-if="delError" id="del-error" class="text-sm text-critical" role="alert">{{ delError }}</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="submit" class="btn btn-danger" :disabled="delBusy || !delPassword">{{ delBusy ? 'Deleting…' : store.isOwner ? 'Delete account and household' : 'Delete my account' }}</button>
+              <button type="button" class="btn btn-ghost" :disabled="delBusy" @click="delOpen = false">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </section>
   </div>
 </template>

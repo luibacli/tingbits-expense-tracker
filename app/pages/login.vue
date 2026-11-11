@@ -22,6 +22,10 @@ const fields = ref<Record<string, string>>({})
 
 watch(mode, () => { formError.value = ''; fields.value = {} })
 
+const deletedNotice = route.query.deleted === 'household'
+  ? 'Your account and household were deleted.'
+  : route.query.deleted === 'account' ? 'Your account was deleted.' : ''
+
 const title = computed(() => ({ signin: 'Sign in', create: 'Create a household', join: 'Join a household' })[mode.value])
 const submitLabel = computed(() => ({ signin: 'Sign in', create: 'Create household', join: 'Join household' })[mode.value])
 
@@ -75,6 +79,7 @@ function focusFirstError() {
   <div class="flex min-h-dvh items-start justify-center px-4 py-10 sm:items-center">
     <main class="w-full max-w-sm">
       <p class="mb-6 flex items-center gap-2 text-lg font-semibold"><Wallet :size="22" aria-hidden="true" /> Tingbits Expense Tracker</p>
+      <p v-if="deletedNotice" class="mb-4 rounded-xl border border-line-strong p-3 text-sm" role="status" data-testid="deleted-notice">{{ deletedNotice }}</p>
       <div class="card p-5" style="box-shadow: var(--shadow)">
         <div class="grid grid-cols-3 rounded-xl bg-surface-2 p-1 text-sm" role="group" aria-label="Choose">
           <button v-for="m in (['signin', 'create', 'join'] as const)" :key="m" type="button" class="min-h-10 rounded-lg font-semibold" :class="mode === m ? 'bg-surface text-ink shadow-sm' : 'text-ink-2'" :aria-pressed="mode === m" @click="mode = m">

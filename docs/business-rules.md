@@ -11,7 +11,10 @@
 | A4 | Any member can add, edit or delete any entry and change budgets, categories, people and methods. | Proposed |
 | A5 | Only the owner can erase all entries and recurring items. Settings, people and accounts are kept. | Proposed |
 | A6 | Passwords need at least 8 characters. Sessions last 60 days. | Proposed |
-| A7 | There is no way yet to remove an account from a household or to transfer ownership. | Proposed (gap) |
+| A7 | The owner can remove another account from the household. That person can no longer sign in, and is signed out on their next request. Entries they added stay. | Proposed (built 2026-11-11) |
+| A8 | The owner can make another account in the household the owner, after re-entering their password. The former owner becomes a member. A household always has an owner. | Proposed (built 2026-11-11) |
+| A9 | Anyone can delete their own account after re-entering their password. A member just leaves (their entries stay). An owner who shares the household must hand it over first. An owner who is the only account deletes the household and all its entries and recurring items, for good. | Proposed (built 2026-11-11) |
+| A10 | Anyone can change their password after entering the current one. Other signed-in devices stay signed in. | Proposed (built 2026-11-11) |
 
 ## Entries
 | # | Rule | Status |

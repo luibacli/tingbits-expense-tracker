@@ -131,7 +131,7 @@ Revenue per household: ₱150.
 | S3 | **Trial and subscription status** per household; read-only mode when lapsed (data never deleted). **Done 2026-11-10 (ADR-008).** | Charging ₱150 | Approved |
 | S4 | **Payments** with PayMongo (card + Maya recurring); webhooks; receipts | Getting paid | Owner's **business registration** and PayMongo account (KYC) |
 | S5 | **Password reset and email verification** | Paying customers must be able to recover access | Email provider |
-| S6 | **Account deletion and data export** for users | Privacy law and trust | |
+| S6 | **Account deletion and data export** for users | Privacy law and trust | **Built 2026-11-11** (rules A7 to A10) |
 | S7 | Vercel **Pro**, custom domain, support email | Commercial hosting terms, credibility | Owner's accounts |
 
 Order: **S1 can be built now.** S3 and S4 need your PayMongo and business setup. S2 needs your legal details. Launching paid sign-ups before S2 to S6 exist would be a promise the build can't keep (kit: proposal reconciliation).

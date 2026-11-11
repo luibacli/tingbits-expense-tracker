@@ -9,7 +9,8 @@
 
 ## Authorization
 - Every data query includes the caller's household id taken from the server-side user record, never from the client.
-- Owner-only actions are checked on the server (`requireOwner`): invite code, erase.
+- Owner-only actions are checked on the server (`requireOwner`): invite code, erase, remove an account, hand over ownership. Every account change is scoped to the caller's household in the database query itself, so an id from another household matches nothing (404).
+- Handing over ownership, changing the password and deleting an account all require the current password, so a phone left signed in cannot be used to take over or erase the household. Ownership is handed over by promoting the new owner before demoting the old one, so a failure in between leaves two owners, never none.
 - Client ids are accepted for creates, but a create whose id exists in another household fails with 409 and changes nothing.
 
 ## Input handling
@@ -28,9 +29,9 @@ CSP (`default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `conne
 - `MONGODB_URI` and `NUXT_SESSION_PASSWORD` live in `.env` (git-ignored) or the host's environment, read only through private `runtimeConfig`. Never shipped to the browser.
 
 ## Data on the device
-- The browser keeps a cache of recent entries and the unsent changes queue in localStorage, so the app works offline. Signing out clears both. Anyone with the unlocked phone can open the app while signed in.
+- The browser keeps a cache of recent entries and the unsent changes queue in localStorage, so the app works offline. Signing out, deleting the account, or the server ending the session (for example the owner removed this account) clears both and returns to the sign-in screen. Anyone with the unlocked phone can open the app while signed in.
 
 ## Known gaps (follow-ups)
 - No password reset or email verification (needs an email provider).
-- No way to remove a member account or transfer ownership.
+- Changing the password does not sign out other devices (the session holds only the user id). A session version on the user would fix this.
 - Rate limiting is per instance (see above).

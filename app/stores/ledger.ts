@@ -294,7 +294,10 @@ export const useLedgerStore = defineStore('ledger', () => {
     }
   }
 
-  function signedOut() {
+  /** Why the session ended, so the sign-in screen can say so. */
+  const endReason = ref<'expired' | 'logout' | 'deleted-account' | 'deleted-household'>('expired')
+  function signedOut(reason: typeof endReason.value = 'expired') {
+    endReason.value = reason
     status.value = 'signed-out'
     user.value = null
     household.value = null
@@ -465,7 +468,7 @@ export const useLedgerStore = defineStore('ledger', () => {
   async function logout() {
     await flush()
     try { await $fetch('/api/auth/logout', { method: 'POST' }) } catch { /* signing out locally is enough to hide data */ }
-    signedOut()
+    signedOut('logout')
   }
 
   async function regenerateInvite() {
@@ -486,6 +489,29 @@ export const useLedgerStore = defineStore('ledger', () => {
     await refresh()
   }
 
+  async function removeAccount(id: string) {
+    await $fetch(`/api/household/accounts/${encodeURIComponent(id)}`, { method: 'DELETE' })
+    await refresh()
+  }
+
+  async function transferOwnership(accountId: string, password: string) {
+    await flush()
+    await $fetch('/api/household/owner', { method: 'POST', body: { accountId, password } })
+    await refresh()
+  }
+
+  async function changePassword(current: string, next: string) {
+    await $fetch('/api/me/password', { method: 'POST', body: { current, next } })
+  }
+
+  /** Deletes the signed-in account (and, for a sole owner, the household). Clears this device. */
+  async function deleteAccount(password: string) {
+    await flush()
+    const res = await $fetch<{ householdDeleted: boolean }>('/api/me', { method: 'DELETE', body: { password, confirm: 'DELETE' } })
+    signedOut(res.householdDeleted ? 'deleted-household' : 'deleted-account')
+    return res
+  }
+
   /** Data saved on this device by the earlier offline-only version, if any. */
   function legacyData(): AppData | null {
     const raw = readJSON<unknown>(LEGACY_KEY)
@@ -497,12 +523,13 @@ export const useLedgerStore = defineStore('ledger', () => {
   }
 
   return {
-    status, user, household, householdName, data, loadedFrom, sync,
+    status, endReason, user, household, householdName, data, loadedFrom, sync,
     categoryMap, memberMap, methodMap, accountMap, isOwner, subscription, canWrite, readOnlyMessage,
     category, money,
     init, refresh, flush, ensureFrom, search,
     addTransaction, updateTransaction, deleteTransaction, restoreTransaction,
     saveRecurring, deleteRecurring, restoreRecurring, markRecurringPaid, undoPaid, skipRecurring,
     login, register, logout, regenerateInvite, importData, eraseLedger, legacyData, forgetLegacyData,
+    removeAccount, transferOwnership, changePassword, deleteAccount,
   }
 })

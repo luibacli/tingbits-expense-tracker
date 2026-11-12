@@ -78,7 +78,7 @@ The EXCOM kit 3.0.0 profiles (SaaS = Landing + Web App + Payments) were run agai
 - Account management (rules A7 to A10, saas-analysis S6): the owner removes an account or hands over ownership; anyone changes their password or deletes their account (sole owner: household and all data). Settings → Household and Your account. The server re-checks every request, so a removed person is sent to sign-in on their next load.
 - Fixed along the way: when the server ended a session while the app was open, the store cleared the device but the app stayed on screen, empty. The layout now returns to sign-in (also used by Sign out and account deletion).
 - Verified: type check; unit 43/43 (9 new: removal, cross-household attempts, transfer with a wrong password, member leave, owner blocked, sole-owner delete touching no other household, password change, validators); e2e 180/180 (45 journeys × 4 browsers, 6 new); screenshots at 390 px and desktop in light and dark.
-- Not done: other devices stay signed in after a password change (`security.md` → Known gaps).
+- Not done at the time: other devices stayed signed in after a password change. **Fixed 2026-11-12** (see above).
 
 ## Motion audit and Level 1 enhancements (2026-11-11)
 - Audit found: no tap feedback on phones; the core "safe to spend" change was silent; landing bars animated `height` (kit violation) and never changed; toasts popped in. Added tap feedback, the settling-number signature, clip-path bars and meters (also Day Strip, trends, categories), and a toast entrance. Rejected scroll reveals, page transitions, parallax and libraries. Details: `CREATIVE_DIRECTION.md` → Motion direction; results: `QA_REPORT.md`.

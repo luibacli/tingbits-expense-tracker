@@ -159,3 +159,30 @@ test('the account API refuses members and other households', async ({ page, brow
   expect(noConfirm.status()).toBe(400)
   await partner.ctx.close()
 })
+
+test('changing the password signs out other devices but keeps this one signed in', async ({ page, browser }) => {
+  const email = await signUp(page)
+  // A second device signed in to the same account.
+  const other = await browser.newContext()
+  const phone = await other.newPage()
+  await signIn(phone, email, PW)
+  await expect(phone).toHaveURL(/\/app$/)
+
+  await ready(page, '/app/settings')
+  await page.getByRole('button', { name: 'Change password' }).click()
+  await page.getByLabel('Current password').fill(PW)
+  await page.getByLabel('New password').fill('new-password-1')
+  await page.getByRole('button', { name: 'Save password' }).click()
+  await expect(page.getByText('Password changed')).toBeVisible()
+
+  // The other device is sent to sign in on its next request, and its old cookie is refused.
+  await phone.reload({ waitUntil: 'networkidle' })
+  await expect(phone).toHaveURL(/\/login/)
+  expect((await phone.request.get('/api/bootstrap')).status()).toBe(401)
+
+  // This device stays signed in.
+  await ready(page, '/app')
+  await expect(page).toHaveURL(/\/app$/)
+  expect((await page.request.get('/api/bootstrap')).status()).toBe(200)
+  await other.close()
+})

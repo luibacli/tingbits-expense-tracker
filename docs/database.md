@@ -6,7 +6,7 @@ MongoDB through Mongoose. Models are in `server/models/index.ts`, with hand-writ
 | Collection | Key fields | Notes |
 |---|---|---|
 | `households` | name, inviteCode (unique), currency, monthlyBudget, periodStartDay, timezone, setupDone, categories[], members[], methods[], **trialEndsAt**, **paidThrough** (ADR-008) | Small document. Categories, people and methods are embedded arrays edited as a whole (last write wins). |
-| `users` | email (unique, lowercase), name, passwordHash (`select: false`), household → households, role, prefs{theme, defaultMemberId, defaultMethodId} | Index on `household` (list accounts of a household). |
+| `users` | email (unique, lowercase), name, passwordHash (`select: false`), household → households, role, sessionVersion (default 0; bumped on password change to end other sessions), prefs{theme, defaultMemberId, defaultMethodId} | Index on `household` (list accounts of a household). |
 | `transactions` | _id (client string), household, type, amount, categoryId, note, date, memberId, methodId, recurringId, createdBy → users | Index `{ household: 1, date: -1 }`: every read is one household, a date range, newest first. |
 | `recurrings` | _id (client string), household, type, amount, categoryId, note, memberId, methodId, frequency, nextDate, auto, active | Index on `household`. |
 

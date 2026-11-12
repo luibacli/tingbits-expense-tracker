@@ -32,7 +32,13 @@ Do not make `/` public (deploy to a public URL or link it) until these are built
 | Footer has no Terms/Privacy yet | S2 legal pages (owner's legal details) |
 | Commercial use | Vercel **Pro** (Hobby is non-commercial) |
 
-## Kit 3.0.0 gaps closed (2026-11-12, branch `chore/ops-gaps`)
+## Password change signs out other devices (2026-11-12, branch `fix/password-signout`)
+- Each account has a session version; cookies carry the version they were issued under. A password change bumps it, so every other device is refused (401) on its next request and the app returns to sign-in. The device used for the change stays signed in. Accounts and cookies from before this change count as version 0, so nothing needed migrating.
+- Verified:
+  - Typecheck passes; unit tests 46 of 46; end-to-end 212 of 212.
+  - The new two-device e2e test was shown to fail with the check removed and to pass with it restored.
+
+## Kit 3.0.0 gaps closed (2026-11-12, merged in PR #1)
 The EXCOM kit 3.0.0 profiles (SaaS = Landing + Web App + Payments) were run against Tingbits.
 - **Fixed:**
   - CI (`.github/workflows/ci.yml`: audit, typecheck, unit, build, e2e in 4 browsers).
@@ -63,7 +69,7 @@ The EXCOM kit 3.0.0 profiles (SaaS = Landing + Web App + Payments) were run agai
   - Backups: Atlas tier and a restore test (`runbook.md`).
   - Monitoring: uptime tool and who receives alerts.
   - Privacy notice and terms: business details and legal review.
-  - Accepted risks A1 to A3 in the threat model.
+  - Accepted risks A1 and A2 in the threat model (A3 was fixed on 2026-11-12).
   - The Proposed business rules.
   - Production database name.
 

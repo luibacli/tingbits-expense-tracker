@@ -2,7 +2,7 @@
 
 ## Authentication
 - Email + password. Passwords are hashed with Node's `scrypt` (N=16384, r=8, p=1, 16-byte random salt), stored as `scrypt$N$salt$hash`, and compared with `timingSafeEqual`. `passwordHash` is excluded from queries by default (`select: false`).
-- Session: h3 `useSession`, an encrypted and sealed cookie `tingbits_session` that holds only the user id. `HttpOnly`, `SameSite=Lax`, `Secure` whenever the request is HTTPS. 60-day lifetime. Key: `NUXT_SESSION_PASSWORD` (32+ characters).
+- Session: h3 `useSession`, an encrypted and sealed cookie `tingbits_session` that holds only the user id and the account's session version. Changing the password bumps the version, so cookies on every other device stop working on their next request (`requireAuth` compares them); the device used for the change gets a fresh cookie. `HttpOnly`, `SameSite=Lax`, `Secure` whenever the request is HTTPS. 60-day lifetime. Key: `NUXT_SESSION_PASSWORD` (32+ characters).
 - Every request reloads the user from the database (`requireAuth`), so a deleted account loses access at once.
 - Sign-in gives the same message and similar timing for an unknown email and a wrong password.
 - Rate limits (in memory, per server instance): sign-in 10 per 15 minutes per IP + email, sign-up 10 per hour per IP, import 20 per hour per household. Configurable with `NUXT_AUTH_RATE_LIMIT`. On serverless hosting each instance counts separately, so this slows guessing but is not a hard cap. A shared store such as Upstash would be needed for that (not added; see follow-ups).
@@ -40,5 +40,4 @@ CSP (`default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `conne
 ## Known gaps (follow-ups)
 - No password reset or email verification (needs an email provider).
 - No database backups confirmed and no restore test yet (`docs/runbook.md` → Backups).
-- Changing the password does not sign out other devices (the session holds only the user id). A session version on the user would fix this.
 - Rate limiting is per instance (see above).

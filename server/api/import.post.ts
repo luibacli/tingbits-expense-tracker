@@ -7,5 +7,7 @@ export default defineEventHandler(async (event) => {
   const raw = await readBody(event).catch(() => null)
   const data = normalizeData(raw)
   if (!data) throw createError({ statusCode: 400, statusMessage: 'That file is not a Tingbits backup.', data: { code: 'VALIDATION' } })
-  return await importBackup(household, userId, data)
+  const res = await importBackup(household, userId, data)
+  securityLog('data.imported', { userId, householdId })
+  return res
 })

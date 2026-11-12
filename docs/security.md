@@ -31,7 +31,14 @@ CSP (`default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, `conne
 ## Data on the device
 - The browser keeps a cache of recent entries and the unsent changes queue in localStorage, so the app works offline. Signing out, deleting the account, or the server ending the session (for example the owner removed this account) clears both and returns to the sign-in screen. Anyone with the unlocked phone can open the app while signed in.
 
+## Security log
+`server/utils/securityLog.ts` writes one JSON line per sensitive event to the server log (`"type":"security"`): sign-up, sign-in, failed sign-in, sign-out, account removed, ownership handed over, account deleted, password changed (with `outcome: "denied"` and a fixed code such as `BAD_PASSWORD` for refused attempts), invite renewed, ledger erased, export, import. Only ids and fixed codes are allowed: no emails, names, passwords, tokens or IP addresses (unit-tested). Kept as long as the host keeps logs.
+
+## Threat model
+`docs/threat-model.md` (ASVS Level 2 target): assets, entry points, 15 threats with mitigations and tests, accepted risks awaiting the owner.
+
 ## Known gaps (follow-ups)
 - No password reset or email verification (needs an email provider).
+- No database backups confirmed and no restore test yet (`docs/runbook.md` → Backups).
 - Changing the password does not sign out other devices (the session holds only the user id). A session version on the user would fix this.
 - Rate limiting is per instance (see above).

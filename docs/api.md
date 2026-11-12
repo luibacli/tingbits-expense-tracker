@@ -17,6 +17,7 @@ All endpoints are under `/api`, take and return JSON, and need a signed-in sessi
 ## Auth
 | Method | Path | Body | Returns | Notes |
 |---|---|---|---|---|
+| GET | `/api/health` | | `{ status: "ok" }` | **public**, for uptime monitors. 200 only when the app and database are reachable, 503 otherwise. |
 | GET | `/api/auth/session` | | `{ signedIn }` | **public**, always 200, reads the cookie only (no database connection; called by the landing page) |
 | POST | `/api/auth/register` | `{ name, email, password, householdName?, inviteCode?, currency, timezone }` | `201 { ok }` + session cookie | **public**. Without `inviteCode` creates a household (owner); with it, joins (member). 409 `EMAIL_TAKEN`, 404 `INVITE_NOT_FOUND`. Rate-limited per IP. |
 | POST | `/api/auth/login` | `{ email, password }` | `{ ok }` + session cookie | **public**. Same 401 for unknown email and wrong password. Rate-limited per IP + email. |

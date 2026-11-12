@@ -3,8 +3,9 @@
 ## 0. This Project
 
 **Tingbits Expense Tracker** (short: **Tingbits**): a household expense tracker for everyday spending, used mostly on phones. *Tingbits* is Bisaya slang for the broke days before payday; the product exists to end them (`docs/saas-analysis.md` §0). Renamed from "Bacli Expenses" on 2026-11-10.
-Built from the EXCOM Agency Kit v2.1.0 (`../excom-agency-kit-v2/agency-kit/CLAUDE.md`) and the
+Built from the EXCOM Agency Kit (now v3.0.0, `../excom-agency-kit-v2/agency-kit/CLAUDE.md`) and the
 web-app reference (`docs/web-app.md`). Where this file and the kit differ, this file wins for this project.
+**Kit profiles: SaaS = Landing (the `/` page) + Web App (`/app`) + Payments.** Each page follows its own profile's motion ceiling and performance budget. Operations docs: `docs/threat-model.md`, `docs/runbook.md`, `docs/releases/`.
 
 Approved project decisions (details and reasons in `docs/decisions/`):
 

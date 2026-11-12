@@ -32,6 +32,41 @@ Do not make `/` public (deploy to a public URL or link it) until these are built
 | Footer has no Terms/Privacy yet | S2 legal pages (owner's legal details) |
 | Commercial use | Vercel **Pro** (Hobby is non-commercial) |
 
+## Kit 3.0.0 gaps closed (2026-11-12, branch `chore/ops-gaps`)
+The EXCOM kit 3.0.0 profiles (SaaS = Landing + Web App + Payments) were run against Tingbits.
+- **Fixed:**
+  - CI (`.github/workflows/ci.yml`: audit, typecheck, unit, build, e2e in 4 browsers).
+  - Security log (ids and fixed codes only; unit-tested).
+  - `/api/health` for uptime checks.
+  - Threat model (`docs/threat-model.md`, 15 threats, ASVS Level 2 target).
+  - Runbook (`docs/runbook.md`).
+  - Release notes draft (`docs/releases/1.0.0.md`).
+  - Privacy notice draft for legal review (`docs/privacy-notice-draft.md`, not published).
+  - Automated accessibility checks (axe, WCAG 2.2 AA rules, every screen in light and dark).
+  - Visual regression baselines for the approved landing and sign-in pages (local only; macOS renders).
+- **Real bug found by axe and fixed:** the Day Strip's 30 day buttons were about 9 px wide on phones, below WCAG 2.2's 24 px minimum target size. The whole chart is now one slider control: tap anywhere or use the arrow keys, Escape for today.
+- **Measured:**
+  - Landing initial JS 91.2 KB gzip (budget 100 KB).
+  - Lighthouse mobile on the local production build, two runs each:
+    - `/`: performance 99 and 100; accessibility, best practices and SEO 100; LCP 1.1 s; CLS 0.
+    - `/login`: performance 100, LCP 0.9 s; SEO 63 is expected because the page is `noindex`.
+  - The Vercel preview still needs measuring.
+  - Dependency audit: no high or critical findings; 6 low and 6 moderate accepted.
+- **New dev dependency:** `@axe-core/playwright` 4.14.0 (MPL-2.0, dev only; required by the kit's testing standard).
+- **Verified:**
+  - Typecheck passes.
+  - Unit tests: 45 of 45.
+  - End-to-end: 208 of 208 (45 journeys + 4 quality tests in 4 browsers, + 3 visual tests in 4 browsers).
+  - Visual baselines matched on two repeat runs.
+  - The CI workflow file parses; it has not run on GitHub yet because the branch is not pushed.
+- **Still needs the owner:**
+  - Backups: Atlas tier and a restore test (`runbook.md`).
+  - Monitoring: uptime tool and who receives alerts.
+  - Privacy notice and terms: business details and legal review.
+  - Accepted risks A1 to A3 in the threat model.
+  - The Proposed business rules.
+  - Production database name.
+
 ## Git and account management (2026-11-11)
 - The project is now a Git repository (`main`, first commit `eed2c6f`). `.env` is ignored; the staged files were scanned for connection strings and keys before the commit.
 - Account management (rules A7 to A10, saas-analysis S6): the owner removes an account or hands over ownership; anyone changes their password or deletes their account (sole owner: household and all data). Settings → Household and Your account. The server re-checks every request, so a removed person is sent to sign-in on their next load.

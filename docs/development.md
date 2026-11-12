@@ -28,10 +28,14 @@ If the database is unreachable the API answers 503 `DB_UNAVAILABLE`, and the app
 | `npm run test:unit` | Vitest: shared logic and server services against an in-memory MongoDB |
 | `npm run test:e2e` | `nuxt build`, then Playwright in Chromium, Pixel 7, iPhone 13 (WebKit) and Firefox against an in-memory MongoDB (`scripts/e2e-server.mjs`) |
 | `npm test` | Unit, then end-to-end |
+| `npx playwright test tests/e2e/visual.spec.ts` | Visual regression against approved baselines (macOS renders; skipped in CI). Update baselines only from an approved design: add `--update-snapshots` |
 | `npm run build` | Production build to `.output/` |
 | `npm run preview` | Serve the production build locally |
 
-No lint command is configured. First Playwright run: `npx playwright install`. Tests never use the database in `.env`.
+No lint command is configured. First Playwright run: `npx playwright install`. Tests never use the database in `.env`. `tests/e2e/quality.spec.ts` runs axe (WCAG 2.2 AA rules) on every screen in light and dark.
+
+## CI
+`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests: `npm ci`, `npm audit --audit-level=high`, typecheck, unit tests, then the production build and the end-to-end suite in 4 browsers, all against throwaway in-memory databases. No secrets are needed. Work on short branches (`feat/…`, `fix/…`, `chore/…`) and merge by pull request.
 
 ## Activating a household by hand (until online payments exist)
 When someone pays you directly (for example by GCash transfer), extend their household by whole months:

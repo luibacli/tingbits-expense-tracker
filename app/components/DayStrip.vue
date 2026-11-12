@@ -6,6 +6,10 @@ import type { Period } from '#shared/types'
  * One bar per day of the budget period, single series in the data hue, with the even
  * daily pace as a dashed reference line. Tap a day to see its entries.
  * Hover/focus shows the day's value in the readout row above the plot (never color alone).
+ *
+ * Accessibility: 30 bars on a phone are about 9 px wide, below the WCAG 2.2 target size
+ * (24 px). So the whole plot is one control (role="slider"): tap or click anywhere picks the
+ * nearest day, arrow keys move between days, Escape goes back to today. Bars are decoration.
  */
 const props = defineProps<{ period: Period, pace: number | null, today: string }>()
 const selected = defineModel<string | null>('selected', { default: null })
@@ -25,6 +29,49 @@ const summary = computed(() => {
 
 function pick(date: string) {
   selected.value = selected.value === date ? null : date
+}
+
+// Days that can be chosen: up to today.
+const choosable = computed(() => days.value.filter((d) => d.date <= props.today))
+const current = computed(() => selected.value ?? props.today)
+const currentIndex = computed(() => Math.max(0, choosable.value.findIndex((d) => d.date === current.value)))
+const currentDay = computed(() => choosable.value[currentIndex.value])
+const valueText = computed(() => {
+  const d = currentDay.value
+  if (!d) return ''
+  return `${formatDay(d.date, props.today)}: ${store.money(d.total)}${props.pace && d.total > props.pace ? ', above pace' : ''}`
+})
+
+const plot = ref<HTMLElement | null>(null)
+function dayAt(clientX: number): string | null {
+  const el = plot.value
+  if (!el || !days.value.length) return null
+  const r = el.getBoundingClientRect()
+  const i = Math.min(days.value.length - 1, Math.max(0, Math.floor(((clientX - r.left) / r.width) * days.value.length)))
+  const d = days.value[i]
+  return d && d.date <= props.today ? d.date : null
+}
+function onPointerMove(e: PointerEvent) {
+  if (e.pointerType === 'mouse') hovered.value = dayAt(e.clientX)
+}
+function onClick(e: MouseEvent) {
+  const d = dayAt(e.clientX)
+  if (d) pick(d)
+}
+function onKey(e: KeyboardEvent) {
+  const last = choosable.value.length - 1
+  const step: Record<string, number> = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -7, PageUp: 7 }
+  let i: number | null = null
+  if (e.key in step) i = currentIndex.value + step[e.key]!
+  else if (e.key === 'Home') i = 0
+  else if (e.key === 'End') i = last
+  else if (e.key === 'Escape' && selected.value) { selected.value = null; hovered.value = props.today; e.preventDefault(); return }
+  if (i === null || last < 0) return
+  e.preventDefault()
+  const d = choosable.value[Math.min(last, Math.max(0, i))]
+  if (!d) return
+  selected.value = d.date === props.today ? null : d.date
+  hovered.value = d.date
 }
 </script>
 
@@ -46,7 +93,25 @@ function pick(date: string) {
       </template>
     </div>
 
-    <div class="relative mt-2 h-24" role="group" :aria-label="summary">
+    <div
+      ref="plot"
+      class="relative mt-2 h-24 cursor-pointer touch-manipulation rounded-sm"
+      role="slider"
+      tabindex="0"
+      aria-label="Day"
+      :aria-describedby="`daystrip-summary-${period.start}`"
+      aria-valuemin="1"
+      :aria-valuemax="choosable.length"
+      :aria-valuenow="currentIndex + 1"
+      :aria-valuetext="valueText"
+      @click="onClick"
+      @pointermove="onPointerMove"
+      @pointerleave="hovered = null"
+      @focus="hovered = current"
+      @blur="hovered = null"
+      @keydown="onKey"
+    >
+      <span :id="`daystrip-summary-${period.start}`" class="sr-only">{{ summary }} Use the arrow keys to choose a day, Escape for today.</span>
       <!-- baseline -->
       <div class="absolute inset-x-0 bottom-0 border-t border-line-strong" aria-hidden="true" />
       <div
@@ -55,20 +120,12 @@ function pick(date: string) {
         :style="{ bottom: `${(pace / max) * 100}%` }"
         aria-hidden="true"
       />
-      <div class="absolute inset-0 flex items-end gap-[2px]">
-        <button
+      <div class="absolute inset-0 flex items-end gap-[2px]" aria-hidden="true">
+        <span
           v-for="d in days"
           :key="d.date"
-          type="button"
-          class="group relative flex h-full min-w-0 flex-1 items-end justify-center"
-          :aria-label="`${formatDay(d.date, today)}: ${store.money(d.total)}`"
-          :aria-pressed="selected === d.date"
-          :disabled="d.date > today"
-          @mouseenter="hovered = d.date"
-          @mouseleave="hovered = null"
-          @focus="hovered = d.date"
-          @blur="hovered = null"
-          @click="pick(d.date)"
+          class="relative flex h-full min-w-0 flex-1 items-end justify-center"
+          :data-date="d.date"
         >
           <span v-if="d.total === 0 && d.date <= today" class="absolute bottom-0 left-1/2 h-[3px] w-full max-w-4 -translate-x-1/2 rounded-t-[2px] bg-line-strong" />
           <span
@@ -77,8 +134,8 @@ function pick(date: string) {
             :class="(selected && selected !== d.date) || (hovered && hovered !== d.date) ? 'opacity-45' : ''"
             :style="{ '--fill': `${d.total > 0 ? Math.max(3, (d.total / max) * 100) : 0}%`, background: 'var(--data)' }"
           />
-          <span v-if="d.date === today" class="absolute -bottom-2 size-1.5 translate-y-full rounded-full bg-ink" aria-hidden="true" />
-        </button>
+          <span v-if="d.date === today" class="absolute -bottom-2 size-1.5 translate-y-full rounded-full bg-ink" />
+        </span>
       </div>
     </div>
     <figcaption class="mt-4 flex justify-between text-xs text-muted">

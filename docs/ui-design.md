@@ -3,7 +3,7 @@
 ## Direction
 Calm, practical, phone-first. A warm paper and ink neutral base with one data hue. The interface should feel like a quick tool you use while queuing to pay, not a dashboard you study. There is no client logo; colors are a neutral foundation, not a brand.
 
-**Signature:** "Safe to spend today" as the hero number on Today, with the **Day Strip**: one bar per day of the budget period under a dashed even-pace line. Tap a day to see its entries.
+**Signature:** "Safe to spend today" as the hero number on Today, with the **Day Strip**: one bar per day of the budget period under a dashed even-pace line. Tap a day to see its entries. The whole plot is one `role="slider"` control (arrow keys, Home/End, Page Up/Down, Escape for today; a tap picks the nearest day), because 30 bars on a phone are about 9 px wide, below the WCAG 2.2 target size of 24 px. Bars are decoration.
 
 ## Tokens (`app/assets/css/main.css`)
 | Role | Light | Dark | Tailwind |

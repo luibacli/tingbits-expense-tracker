@@ -12,6 +12,6 @@ export default defineEventHandler(async (event) => {
   }
   securityLog('auth.login', { userId: user._id, householdId: user.household })
   const session = await appSession(event)
-  await session.update({ userId: String(user._id) })
+  await session.update({ userId: String(user._id), v: user.sessionVersion ?? 0 })
   return { ok: true }
 })

@@ -67,7 +67,17 @@ export async function deleteOwnAccount(userId: Types.ObjectId, password: string)
   return { householdDeleted: true }
 }
 
-export async function changePassword(userId: Types.ObjectId, current: string, next: string): Promise<void> {
+/**
+ * Change the password and bump the session version, which signs out every other device
+ * (their cookies carry the old version). Returns the new version so the caller can keep
+ * the current device signed in.
+ */
+export async function changePassword(userId: Types.ObjectId, current: string, next: string): Promise<number> {
   await checkPassword(userId, current)
-  await UserModel.updateOne({ _id: userId }, { $set: { passwordHash: await hashPassword(next) } })
+  const user = await UserModel.findOneAndUpdate(
+    { _id: userId },
+    { $set: { passwordHash: await hashPassword(next) }, $inc: { sessionVersion: 1 } },
+    { returnDocument: 'after' },
+  ).lean()
+  return user?.sessionVersion ?? 0
 }

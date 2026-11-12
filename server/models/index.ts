@@ -37,6 +37,8 @@ export interface UserDoc {
   household: Types.ObjectId
   role: 'owner' | 'member'
   prefs: { theme: 'system' | 'light' | 'dark', defaultMemberId: string | null, defaultMethodId: string | null }
+  /** Bumped when the password changes; sessions issued under an older version stop working. Missing = 0. */
+  sessionVersion?: number
   createdAt?: Date
   updatedAt?: Date
 }
@@ -111,6 +113,7 @@ const userSchema = new Schema<UserDoc>({
   passwordHash: { type: String, required: true, select: false },
   household: { type: Schema.Types.ObjectId, ref: 'Household', required: true, index: true },
   role: { type: String, enum: ['owner', 'member'], required: true },
+  sessionVersion: { type: Number, default: 0 },
   prefs: {
     theme: { type: String, enum: ['system', 'light', 'dark'], default: 'system' },
     defaultMemberId: { type: String, default: null },

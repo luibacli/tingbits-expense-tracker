@@ -108,9 +108,20 @@ describe('change password', () => {
   it('needs the current password; the new one works afterwards', async () => {
     const { member } = await family()
     await expect(changePassword(member.userId, 'wrong-password', 'new-password-1')).rejects.toMatchObject({ statusCode: 401 })
-    await changePassword(member.userId, PW, 'new-password-1')
+    expect(await changePassword(member.userId, PW, 'new-password-1')).toBe(1)
     await expect(authenticate('member@example.com', PW)).rejects.toMatchObject({ statusCode: 401 })
     await expect(authenticate('member@example.com', 'new-password-1')).resolves.toBeTruthy()
+  })
+})
+
+describe('session version', () => {
+  it('starts at 0, rises with every password change, and is untouched by a wrong current password', async () => {
+    const { member } = await family()
+    expect((await UserModel.findById(member.userId).lean())!.sessionVersion).toBe(0)
+    await expect(changePassword(member.userId, 'wrong-password', 'x-password-1')).rejects.toMatchObject({ statusCode: 401 })
+    expect((await UserModel.findById(member.userId).lean())!.sessionVersion).toBe(0)
+    expect(await changePassword(member.userId, PW, 'new-password-1')).toBe(1)
+    expect(await changePassword(member.userId, 'new-password-1', 'new-password-2')).toBe(2)
   })
 })
 

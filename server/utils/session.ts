@@ -4,7 +4,8 @@ import { UserModel } from '../models'
 import { getHouseholdDoc } from '../services/household'
 import { assertWritable, ensureTrial } from '../services/subscription'
 
-interface SessionData { userId?: string }
+/** `v` is the account's session version when the cookie was issued (see UserDoc.sessionVersion). */
+interface SessionData { userId?: string, v?: number }
 
 const SIXTY_DAYS = 60 * 24 * 60 * 60
 
@@ -26,12 +27,14 @@ export function appSession(event: H3Event) {
 
 /**
  * The signed-in account and its household, loaded fresh from the database on every request,
- * so a removed account or changed role takes effect immediately.
+ * so a removed account, a changed role or a changed password takes effect immediately.
  */
 export async function requireAuth(event: H3Event) {
   const session = await appSession(event)
   const id = session.data.userId
-  const user = id && Types.ObjectId.isValid(id) ? await UserModel.findById(id).lean() : null
+  const found = id && Types.ObjectId.isValid(id) ? await UserModel.findById(id).lean() : null
+  // A cookie issued before the password changed no longer counts (missing versions are 0).
+  const user = found && (found.sessionVersion ?? 0) === (session.data.v ?? 0) ? found : null
   if (!user) {
     if (id) await session.clear()
     throw createError({ statusCode: 401, statusMessage: 'Please sign in.', data: { code: 'UNAUTHENTICATED' } })

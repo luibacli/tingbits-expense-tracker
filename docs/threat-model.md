@@ -2,7 +2,7 @@
 
 - Date / version: 2026-11-12, app 1.0.0 before public launch. Update when auth, data or payments change.
 - Security target: OWASP ASVS Level 2 (EXCOM kit 3.0.0, Web App profile).
-- Prepared by: Claude; to be reviewed by paladin and the owner.
+- Prepared by: Claude; to be reviewed by excom-security and the owner.
 
 ## 1. Assets
 | Asset | Class | Why it matters |

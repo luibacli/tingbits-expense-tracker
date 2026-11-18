@@ -90,7 +90,7 @@ The loop: **understand → build → verify → PR (CI + Vercel preview) → own
 - **Investigate first:** read the relevant code and docs, reuse existing helpers and patterns. Existing conventions beat personal preference.
 - **Stay in scope:** fix what was asked. Mention unrelated problems in the summary instead of fixing them.
 - **Owner decisions are asked, never assumed:** business rules, prices, legal or privacy wording, data retention, who sees what. Offer a recommended default.
-- **Agents:** do the work directly. Use the paladin agent only for diffs touching auth, roles, data access, payments, imports/exports or personal data.
+- **Agents:** do the work directly. Use the excom-security agent only for diffs touching auth, roles, data access, payments, imports/exports or personal data.
 
 ## 7. Verify
 

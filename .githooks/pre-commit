@@ -2,7 +2,7 @@
 # EXCOM repository rule (standards/DEVOPS_RELEASE.md -> Repository contents).
 # A repo holds source, config, tests, docs and the assets the site ships. This hook blocks a commit that adds:
 #   - anything inside _private/ (the drop zone for client and business files)
-#   - business documents, design sources, archives, data dumps and raw video outside their allowed folders
+#   - business documents, design sources, archives, data dumps, raw photos, and PDFs, videos or images outside the folders the project ships or tests
 #   - any file over 5 MB
 # To commit one of these on purpose, add its exact path to .githooks/allowed-files (one path per line).
 # Installed in a project as .githooks/pre-commit and enabled with: git config core.hooksPath .githooks
@@ -37,6 +37,12 @@ check_file() {
       case "$lower" in
         (public/*) kind="" ;;
         (*) kind="PDF or video outside public/" ;;
+      esac ;;
+    (*.heic|*.heif|*.tif|*.tiff|*.raw|*.cr2|*.cr3|*.nef|*.arw|*.dng|*.orf) kind="raw camera photo" ;;
+    (*.jpg|*.jpeg|*.png|*.gif|*.webp|*.avif|*.svg|*.ico|*.bmp)
+      case "$lower" in
+        (public/*|app/*|src/*|assets/*|static/*|components/*|pages/*|layouts/*|server/*|tests/*|test/*|e2e/*|docs/*|.github/*) kind="" ;;
+        (*) kind="image outside the folders the project ships or tests (public/, app/, src/, assets/, tests/, docs/...)" ;;
       esac ;;
   esac
   if [ -n "$kind" ]; then echo "  $f  -> $kind: keep it in _private/"; return 0; fi

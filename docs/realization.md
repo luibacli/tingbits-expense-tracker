@@ -62,3 +62,34 @@ The kit carried the **website** half well: the Nuxt starter, security headers, 4
 - Owner: confirm the Proposed rules; create the first account against the real database; approve the Vercel deployment and Atlas network access.
 - Build next (if approved): password reset (email provider), remove a member or transfer ownership, shared rate-limit store.
 - Visual QA still missing at 768 px and desktop for the new screens, and Lighthouse.
+
+---
+
+# Realization: process weight for an owner-run product (2026-11-18)
+
+- Kit version used: 3.0.0 → led to kit 3.1.0 (product mode)
+- Milestone: first deployment done (2026-11-12); CI and deploy flow slimmed before further feature work.
+
+## What slowed us down
+- **The client process ran on a product with no client.** The owner approved their own release notes, wrote status entries for one-line fixes, and every diff could pull in review agents.
+- **CI ran twice per change** (PR, then push to `main`), 6.1 to 11.4 min each, mostly installing three browsers and running 136 e2e tests on 4 browser projects.
+- **Deploys were manual** (`vercel --prod`) after CI, with no preview per PR.
+- **A blocking `npm audit` failed a PR** on picomatch GHSA-fc5q-39xc-vjpf: high severity, no patched version, build-time only (not in the server bundle). Nothing in our code could fix it.
+- **`CLAUDE.md` was 958 lines**, mostly generic engineering advice, loaded every session; it also named validation helpers the code doesn't use.
+
+## What we changed (PRs #4 and #5)
+| Change | Result |
+|---|---|
+| CI on PRs only; type check + unit and e2e as parallel jobs | One run per change |
+| PR e2e on the phones users carry (Pixel 7, iPhone); full 4-browser run by hand before minor/major releases | 106 tests instead of 212 per PR |
+| Dependabot alerts instead of the blocking audit | Advisories reported without blocking unrelated work |
+| Vercel Git integration: PR = preview, merge = production; the owner's merge is the approval | No manual deploy step |
+| `CLAUDE.md` 958 → 116 lines | Same project rules, less context per session |
+| Release notes only for minor/major; status at milestones | No paperwork for patches |
+- Measured: the first lean CI run took **3 min 41 s** end to end (type check + unit 0.3 min, e2e 3.6 min, in parallel), against about 14 to 19 min of CI per change before.
+
+## What we kept on purpose
+Type check, unit tests (money math, household isolation, subscription access), e2e on real-device profiles, the guard hook against secrets and force-push, owner-only production actions, the smoke test, and every security, privacy and payment rule. Backups and a restore test remain a paid-launch blocker.
+
+## Kit change
+The kit assumed every project has a client. **Kit 3.1.0 adds product mode** (`/Users/luigiebacli/excom-ai-kit/agency-kit/PRODUCT_MODE.md`): the owner approves, three checkpoints instead of nine gates, the lean loop above, what never relaxes, and what only a product needs (legal owner, running costs, name and domain, a monthly traction check). Client mode is unchanged. Open for client mode: the starter CI's blocking audit can fail client PRs the same way.

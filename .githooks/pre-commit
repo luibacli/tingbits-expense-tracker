@@ -1,0 +1,60 @@
+#!/bin/sh
+# EXCOM repository rule (standards/DEVOPS_RELEASE.md -> Repository contents).
+# A repo holds source, config, tests, docs and the assets the site ships. This hook blocks a commit that adds:
+#   - anything inside _private/ (the drop zone for client and business files)
+#   - business documents, design sources, archives, data dumps and raw video outside their allowed folders
+#   - any file over 5 MB
+# To commit one of these on purpose, add its exact path to .githooks/allowed-files (one path per line).
+# Installed in a project as .githooks/pre-commit and enabled with: git config core.hooksPath .githooks
+
+max_bytes=5242880
+root=$(git rev-parse --show-toplevel)
+allow="$root/.githooks/allowed-files"
+
+# Prints one line per problem with the file; prints nothing when the file is fine.
+check_file() {
+  f="$1"
+  if [ -f "$allow" ] && grep -qxF "$f" "$allow"; then return 0; fi
+  lower=$(printf '%s' "$f" | tr 'A-Z' 'a-z')
+
+  case "$lower" in
+    (_private/*|*/_private/*)
+      echo "  $f  -> inside _private/, which is never committed"; return 0 ;;
+  esac
+
+  kind=""
+  case "$lower" in
+    (*.doc|*.docx|*.xls|*.xlsx|*.ppt|*.pptx|*.csv|*.numbers|*.pages|*.key) kind="business document" ;;
+    (*.psd|*.ai|*.af|*.afdesign|*.afphoto|*.fig|*.sketch|*.xd|*.indd) kind="design source file" ;;
+    (*.zip|*.rar|*.7z|*.tar|*.gz|*.tgz) kind="archive" ;;
+    (*.dump|*.bak|*.sqlite|*.db) kind="data dump" ;;
+    (*.sql)
+      case "$lower" in
+        (*/migrations/*|migrations/*|supabase/*) kind="" ;;
+        (*) kind="SQL outside a migrations folder (data dump?)" ;;
+      esac ;;
+    (*.pdf|*.mp4|*.mov|*.avi|*.mkv|*.webm)
+      case "$lower" in
+        (public/*) kind="" ;;
+        (*) kind="PDF or video outside public/" ;;
+      esac ;;
+  esac
+  if [ -n "$kind" ]; then echo "  $f  -> $kind: keep it in _private/"; return 0; fi
+
+  size=$(git cat-file -s ":$f" 2>/dev/null || echo 0)
+  if [ "$size" -gt "$max_bytes" ]; then
+    echo "  $f  -> $((size / 1048576)) MB, over the 5 MB limit (raw photo or video? ship an optimized copy)"
+  fi
+}
+
+problems=$(git diff --cached --name-only --diff-filter=ACMR | while IFS= read -r file; do check_file "$file"; done)
+
+if [ -n "$problems" ]; then
+  echo "Commit blocked by the EXCOM repository rule:"
+  echo "$problems"
+  echo ""
+  echo "Move business files into _private/ (git-ignored), or ship an optimized copy in public/ or app/assets/."
+  echo "If one really belongs in the repo, add its path to .githooks/allowed-files and commit again."
+  exit 1
+fi
+exit 0

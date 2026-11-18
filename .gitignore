@@ -12,3 +12,47 @@ node_modules
 playwright-report
 test-results
 .vercel
+
+# >>> EXCOM repository rule (standards/DEVOPS_RELEASE.md -> Repository contents)
+# Client and business files live in _private/, never in the repo. .githooks/pre-commit enforces this.
+_private/
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.csv
+*.numbers
+*.pages
+*.key
+*.psd
+*.ai
+*.af
+*.afdesign
+*.afphoto
+*.fig
+*.sketch
+*.xd
+*.indd
+*.zip
+*.rar
+*.7z
+*.tar
+*.tgz
+*.dump
+*.bak
+*.sqlite
+*.db
+*.sql
+!**/migrations/**/*.sql
+!supabase/**/*.sql
+*.pdf
+*.mp4
+*.mov
+*.avi
+*.mkv
+!public/**/*.pdf
+!public/**/*.mp4
+!public/**/*.webm
+# <<< EXCOM repository rule

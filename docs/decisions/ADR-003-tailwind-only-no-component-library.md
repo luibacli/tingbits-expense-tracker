@@ -15,7 +15,7 @@ Tailwind CSS 4 is the only styling tool. Standard controls are native elements (
 
 ## Consequences
 - Smaller bundle and one styling system.
-- Accessibility is our job. The rules in CLAUDE.md §6 (roles, labels, focus, 44 px targets, states) are mandatory and checked by Playwright.
+- Accessibility is our job. The rules in CLAUDE.md §5 (roles, labels, focus, 44 px targets, states) are mandatory and checked by Playwright.
 
 ## Date
 2026-11-09

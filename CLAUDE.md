@@ -13,7 +13,7 @@ Approved project decisions (details and reasons in `docs/decisions/`):
 - Household accounts: email + password. The first person creates a household, and others join with an invite code. Everyone in a household shares one ledger. (ADR-002)
 - Tailwind CSS 4 is the only styling tool. No PrimeVue or any other component library. (ADR-003)
 - The app stays usable with bad signal: the last data is cached on the device and changes made offline are queued and sent later. (ADR-004)
-- Hosting: Vercel, functions in `hkg1` next to the Atlas cluster (`ap-east-1`). Deploy only with the owner's go-ahead. (ADR-006)
+- Hosting: Vercel, functions in `hkg1` next to the Atlas cluster (`ap-east-1`). Merging a PR to `main` deploys to production (Vercel Git integration); the owner's merge is the go-ahead. Claude never merges or runs `vercel --prod` without being asked. (ADR-006)
 - Trial and subscription: 30-day no-card trial, then read-only (server returns 402) until paid; access is date-based (`trialEndsAt`, `paidThrough`). (ADR-008)
 - SaaS: public landing page at `/` (server-rendered, prerendered, indexable), the app under `/app` (client-only, noindex). Direction A "Listahan". ₱150/month per household. (ADR-007, `docs/saas-analysis.md`, `docs/CREATIVE_DIRECTION.md`)
 - Motion: Level 1 (functional feedback). One signature moment: the safe-to-spend figure settles on its new value. Only transform/opacity/clip-path animate; no motion libraries. (`docs/CREATIVE_DIRECTION.md` → Motion direction)

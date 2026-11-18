@@ -1,7 +1,7 @@
 # ADR-006: Host on Vercel, functions in Hong Kong next to the database
 
 ## Status
-Accepted (deployment itself still needs the owner's go-ahead)
+Accepted. Amended 2026-11-18: production deploys from `main` through the Vercel Git integration; the owner merging a PR is the go-ahead.
 
 ## Context
 The app needs a Node server for its API (ADR-001). The MongoDB Atlas cluster runs in AWS `ap-east-1` (Hong Kong), read from the cluster's own `hello` tags on 2026-11-10. Vercel runs functions in `iad1` (Washington, USA) by default. A Bootstrap request makes several database round trips, and each would cross the Pacific (about 200 ms each).
@@ -23,6 +23,7 @@ The app needs a Node server for its API (ADR-001). The MongoDB Atlas cluster run
 - Vercel Hobby is for non-commercial use: fine for this personal household app. A commercial version would need Vercel Pro.
 - Atlas must accept connections from Vercel, which has no fixed IPs on Hobby, so Network Access needs `0.0.0.0/0` plus a strong database user password.
 - Rate limits are per function instance (see `docs/security.md`).
+- 2026-11-18: deploys go through Git (PR → preview, merge → production) instead of the CLI, to cut release time. CI runs on PRs only; a direct push to `main` would deploy untested code, so changes go through PRs.
 
 ## Date
 2026-11-10

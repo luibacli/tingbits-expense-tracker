@@ -3,7 +3,7 @@
 For whoever is looking after production. No secret values here; it says where they live.
 
 ## Overview
-- Production URL: not deployed yet (owner deploys; `docs/development.md` → Deploying to Vercel).
+- Production URL: https://tingbits.vercel.app (first deployed 2026-11-12; custom domain `tingbits.app` recommended, not bought yet).
 - Hosting: Vercel, functions in `hkg1` (Hong Kong). Commercial use needs the Pro plan.
 - Database: MongoDB Atlas, AWS `ap-east-1` (Hong Kong). Database name is part of `MONGODB_URI` (currently `bacli_expense_dev`). **Tier and backups: not recorded yet; owner to confirm (see Backups).**
 - Secrets: `MONGODB_URI`, `NUXT_SESSION_PASSWORD` in Vercel → Project → Settings → Environment Variables, and in the local `.env` (never committed).
@@ -40,7 +40,8 @@ Per household, owners can always download their own JSON backup in Settings, but
 ## Common problems
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| App says "Cannot reach the database"; `/api/health` 503 | Atlas Network Access, cluster paused, wrong `MONGODB_URI` | Atlas → Network Access must allow `0.0.0.0/0` for Vercel; resume the cluster; check the variable |
+| `/api/health` 503 "The database is not configured" or `/api/auth/session` 500 "Server is not configured" | `MONGODB_URI` or `NUXT_SESSION_PASSWORD` missing in Vercel for this environment, or added without redeploying | Add both for Production, then Redeploy (variables apply only to new deployments) |
+| App says "Cannot reach the database"; `/api/health` 503 | Taking about 8 s: Atlas Network Access is blocking the host. Failing fast: wrong `MONGODB_URI` or password. Also: cluster paused | Atlas → Network Access must allow `0.0.0.0/0` for Vercel; resume the cluster; check the variable |
 | Locally: `querySrv ECONNREFUSED` after changing networks | The Node process kept the old network's DNS | Restart the server |
 | Everyone signed out at once | `NUXT_SESSION_PASSWORD` changed | Expected after rotation |
 | A household cannot add entries (402) | Trial or paid period ended | `scripts/grant-subscription.mjs` after payment (`docs/development.md`) |

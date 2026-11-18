@@ -32,6 +32,20 @@ Do not make `/` public (deploy to a public URL or link it) until these are built
 | Footer has no Terms/Privacy yet | S2 legal pages (owner's legal details) |
 | Commercial use | Vercel **Pro** (Hobby is non-commercial) |
 
+## First deployment (2026-11-12): https://tingbits.vercel.app
+- Deployed by the owner on Vercel (functions in `hkg1`). The first attempts failed: the environment variables were missing (`/api/health` 503 "not configured", `/api/auth/session` 500), then Atlas Network Access blocked Vercel (503 after the 8 s server-selection timeout). Both were fixed by the owner; the runbook now lists both symptoms.
+- **Read-only smoke test, passed:**
+  - Health 200 in 0.36 s.
+  - Landing page renders with the ₱150 price; `/` loads in 0.16 s and `/login` in 0.22 s.
+  - Signed-out API calls return 401; a wrong password returns 401 `BAD_CREDENTIALS`; a cross-site form post returns 403.
+  - Security headers present; private API responses `no-store`; `robots.txt` hides `/app`, `/login` and `/api/`; the manifest and service worker are served.
+- **Sign-up smoke test on the real database, with the owner's approval; passed on a Pixel 7 profile:**
+  - A test household was created in pesos on a 30-day trial.
+  - An entry was saved to the server and then deleted.
+  - Deleting the account removed the household; signing in afterwards returned 401.
+  - A read-only count found no leftover test data.
+- Not yet checked on the live site: Lighthouse on the Vercel URL, installing on a real phone, offline use over HTTPS. The database is still named `bacli_expense_dev`.
+
 ## Password change signs out other devices (2026-11-12, branch `fix/password-signout`)
 - Each account has a session version; cookies carry the version they were issued under. A password change bumps it, so every other device is refused (401) on its next request and the app returns to sign-in. The device used for the change stays signed in. Accounts and cookies from before this change count as version 0, so nothing needed migrating.
 - Verified:

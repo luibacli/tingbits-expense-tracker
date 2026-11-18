@@ -9,6 +9,10 @@ name: CI
 # Dependency security: GitHub Dependabot alerts, not a CI gate (docs/development.md -> CI).
 on:
   pull_request:
+    paths-ignore: # docs-only changes skip CI (code, config or mixed changes still run)
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
   workflow_dispatch:
 
 permissions:

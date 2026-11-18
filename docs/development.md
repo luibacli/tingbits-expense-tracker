@@ -70,7 +70,9 @@ npx vercel@65 env add MONGODB_URI production   # paste the production connection
 npx vercel@65 deploy                    # preview URL: test sign-up, add, offline, invite
 npx vercel@65 deploy --prod             # production
 ```
-Later, to deploy from GitHub: push the project and import it in Vercel. Same variables, and `vercel.json` still applies.
+**Deploy from GitHub (the normal path):** Vercel → the `tingbits` project → Settings → Git → connect `luibacli/tingbits-expense-tracker`, production branch `main`. From then on every pull request gets a preview URL and every merge to `main` deploys to production (`docs/runbook.md` → Deploy). Same variables, and `vercel.json` still applies. Preview deploys need the variables in the "Preview" environment too; point them at a separate test database, never production data.
+
+**CI** (`.github/workflows/ci.yml`): pull requests run type check + unit tests and e2e (Chromium + iPhone Safari) as two parallel jobs. The full 4-browser e2e run is nightly and on demand. To run the PR subset locally: `npm run test:e2e -- --project=chromium --project=mobile-safari`.
 
 **After deploying**
 - Open the URL on your phone, sign up, and use **Add to Home Screen**. Offline mode needs HTTPS, which Vercel provides.

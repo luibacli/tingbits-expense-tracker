@@ -1,19 +1,30 @@
 name: CI
 
-# Runs on every push to main and every pull request. Never uses the real database:
-# unit tests and e2e start their own in-memory MongoDB (docs/development.md).
+# Never uses the real database: unit tests and e2e start their own in-memory MongoDB (docs/development.md).
+#
+# Pull requests: fast checks. Type check + unit tests and e2e run as two parallel jobs; e2e covers
+# Chromium and iPhone Safari (WebKit), where real users are.
+# Nightly and on demand (Actions -> CI -> Run workflow): the full run on all 4 browsers.
+# No run on push to main: the PR already passed, and Vercel deploys main on merge (docs/runbook.md).
 on:
   pull_request:
-  push:
-    branches: [main]
+  schedule:
+    - cron: '0 18 * * *' # 02:00 Manila
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A new push to the same PR cancels the run still going for the old commit.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  checks:
+    name: Type check and unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,10 +44,43 @@ jobs:
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Unit and service tests
         run: npm run test:unit
+
+  e2e:
+    name: End-to-end (${{ github.event_name == 'pull_request' && 'Chromium + iPhone Safari' || 'all 4 browsers' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FULL: ${{ github.event_name != 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Cache the test MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.FULL }}-${{ hashFiles('package-lock.json') }}
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit firefox
-      - name: Build and end-to-end tests (production build, 4 browsers)
-        run: npm run test:e2e
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps ${{ env.FULL == 'true' && 'chromium webkit firefox' || 'chromium webkit' }}
+      - name: Install Playwright system libraries (browsers came from cache)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps ${{ env.FULL == 'true' && 'chromium webkit firefox' || 'chromium webkit' }}
+      - name: Build and end-to-end tests (production build)
+        run: |
+          if [ "$FULL" = "true" ]; then npm run test:e2e
+          else npm run test:e2e -- --project=chromium --project=mobile-safari
+          fi
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@v4

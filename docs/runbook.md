@@ -10,11 +10,11 @@ For whoever is looking after production. No secret values here; it says where th
 - Health check: `GET /api/health` returns `200 {"status":"ok"}` only when the app and the database are reachable; otherwise 503.
 
 ## Deploy
-1. Open a pull request. CI runs type check, unit tests and e2e on Chromium + iPhone Safari (`.github/workflows/ci.yml`); Vercel posts a preview URL on the PR.
+1. Open a pull request. CI runs type check, unit tests and e2e on Android Chrome (Pixel 7) + iPhone Safari (`.github/workflows/ci.yml`); Vercel posts a preview URL on the PR.
 2. Merge when CI is green. **Merging is the owner's go-ahead**: Vercel deploys `main` to production automatically.
 3. Smoke test within 15 minutes: `/` loads, `/api/health` is 200, sign in, add and delete one entry on a test household, no new errors in Vercel → Logs.
 4. Release notes (`docs/releases/`) only for minor and major versions; for a patch the PR description is the record.
-- The full e2e run on all 4 browsers runs nightly and on demand (GitHub → Actions → CI → Run workflow). Run it before a minor or major release.
+- Before a minor or major release, run the full e2e on all 4 browsers: GitHub → Actions → CI → Run workflow.
 - Without the Git integration (or in an emergency): `npx vercel@65 deploy --prod` from the project.
 
 ## Roll back

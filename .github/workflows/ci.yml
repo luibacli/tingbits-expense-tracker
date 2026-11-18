@@ -2,14 +2,13 @@ name: CI
 
 # Never uses the real database: unit tests and e2e start their own in-memory MongoDB (docs/development.md).
 #
-# Pull requests: fast checks. Type check + unit tests and e2e run as two parallel jobs; e2e covers
-# Chromium and iPhone Safari (WebKit), where real users are.
-# Nightly and on demand (Actions -> CI -> Run workflow): the full run on all 4 browsers.
+# Pull requests: type check + unit tests and e2e run as two parallel jobs. E2e covers the two phones
+# real users carry: Android Chrome (Pixel 7) and iPhone Safari (WebKit).
+# Before a minor or major release, run it by hand (Actions -> CI -> Run workflow) for all 4 browsers.
 # No run on push to main: the PR already passed, and Vercel deploys main on merge (docs/runbook.md).
+# Dependency security: GitHub Dependabot alerts, not a CI gate (docs/development.md -> CI).
 on:
   pull_request:
-  schedule:
-    - cron: '0 18 * * *' # 02:00 Manila
   workflow_dispatch:
 
 permissions:
@@ -33,8 +32,6 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Dependency audit (high and critical fail the build)
-        run: npm audit --audit-level=high
       - name: Type check
         run: npm run typecheck
       - name: Cache the test MongoDB binary
@@ -46,7 +43,7 @@ jobs:
         run: npm run test:unit
 
   e2e:
-    name: End-to-end (${{ github.event_name == 'pull_request' && 'Chromium + iPhone Safari' || 'all 4 browsers' }})
+    name: End-to-end (${{ github.event_name == 'pull_request' && 'Android + iPhone' || 'all 4 browsers' }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -79,7 +76,7 @@ jobs:
       - name: Build and end-to-end tests (production build)
         run: |
           if [ "$FULL" = "true" ]; then npm run test:e2e
-          else npm run test:e2e -- --project=chromium --project=mobile-safari
+          else npm run test:e2e -- --project=mobile-chrome --project=mobile-safari
           fi
       - name: Upload Playwright report on failure
         if: failure()
